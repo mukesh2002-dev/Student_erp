@@ -1,0 +1,22 @@
+export const reportCard = {
+  student: "Aman Kumar",
+  class: "10-A",
+  roll: "01",
+  session: "2026-27",
+  subjects: [
+    { name: "Mathematics", max: 100, obtained: 88, percent: 88, grade: "A" },
+    { name: "Science", max: 100, obtained: 84, percent: 84, grade: "A" },
+    { name: "English", max: 100, obtained: 79, percent: 79, grade: "B+" },
+    { name: "Hindi", max: 100, obtained: 86, percent: 86, grade: "A" },
+    { name: "Social Science", max: 100, obtained: 81, percent: 81, grade: "A" },
+  ],
+  total: "418/500",
+  percentage: "83.6%",
+  grade: "A",
+  result: "PASS",
+  attendance: "94.8%",
+  remarks: "Excellent performance. Continue regular practice and revision.",
+  classTeacher: "Rajesh Kumar",
+  principal: "Dr. R.K. Mishra",
+  date: "21 Sep 2026",
+};

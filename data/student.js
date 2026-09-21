@@ -1,0 +1,32 @@
+export const student = {
+  name: "Aman Kumar",
+  studentId: "STU-2026-001",
+  admissionNo: "ADM-2022-1045",
+  class: "10-A",
+  rollNumber: "01",
+  section: "A",
+  academicSession: "2026-27",
+  dob: "15 May 2011",
+  gender: "Male",
+  bloodGroup: "B+",
+  father: "Sanjay Kumar",
+  mother: "Neha Kumari",
+  parentPhone: "+91 98765 12345",
+  email: "aman.kumar@student.demo",
+  address: "Madhubani, Bihar",
+  admissionDate: "10 April 2022",
+  house: "Red House",
+  classTeacher: "Rajesh Kumar",
+  avatar: "AK",
+};
+
+export const dashboardStats = [
+  { label: "Overall Attendance", value: "94.8%", sub: "114/120 days", icon: "attendance", color: "indigo" },
+  { label: "Homework", value: "86%", sub: "15/18 submitted", icon: "homework", color: "emerald" },
+  { label: "Syllabus", value: "72%", sub: "Overall progress", icon: "syllabus", color: "blue" },
+  { label: "Average Marks", value: "82.4%", sub: "Across all subjects", icon: "marks", color: "violet" },
+  { label: "Pending Homework", value: "3", sub: "Due this week", icon: "pending", color: "amber" },
+  { label: "Upcoming Exams", value: "2", sub: "In next 15 days", icon: "exam", color: "rose" },
+  { label: "Assignments", value: "5", sub: "Active", icon: "assignment", color: "cyan" },
+  { label: "Fees Due", value: "₹4,500", sub: "Due 30 Sep 2026", icon: "fees", color: "orange" },
+];

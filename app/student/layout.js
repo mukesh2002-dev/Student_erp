@@ -1,0 +1,75 @@
+"use client";
+import { useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import { BottomNav, MobileSidebar } from "@/components/MobileNav";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, BookMarked, FileText, CalendarDays, ClipboardCheck, HelpCircle, PenTool, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, Bus, ClipboardCheck as AssignIcon, Clock } from "lucide-react";
+
+const nav = [
+  { label: "Dashboard", href: "/student", icon: LayoutDashboard },
+  { label: "Academic", heading: true },
+  { label: "My Classes", href: "/student/classes", icon: GraduationCap },
+  { label: "Subjects", href: "/student/subjects", icon: BookOpen },
+  { label: "Class Work", href: "/student/classwork", icon: ClipboardList },
+  { label: "Home Work", href: "/student/homework", icon: Home },
+  { label: "Assignments", href: "/student/assignments", icon: AssignIcon },
+  { label: "Topics / Syllabus", href: "/student/topics", icon: Library },
+  { label: "Study Materials", href: "/student/materials", icon: BookMarked },
+  { label: "Timetable", href: "/student/timetable", icon: Clock },
+  { label: "Attendance", heading: true },
+  { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
+  { label: "Examination", heading: true },
+  { label: "Exams", href: "/student/exams", icon: FileText },
+  { label: "Question Bank", href: "/student/question-bank", icon: HelpCircle },
+  { label: "Practice Tests", href: "/student/practice-tests", icon: PenTool },
+  { label: "Results", href: "/student/results", icon: BarChart3 },
+  { label: "Report Card", href: "/student/report-card", icon: Award },
+  { label: "Communication", heading: true },
+  { label: "Notices", href: "/student/notices", icon: Bell },
+  { label: "Messages", href: "/student/messages", icon: MessageCircle },
+  { label: "Calendar", href: "/student/calendar", icon: Calendar },
+  { label: "Other", heading: true },
+  { label: "Transport", href: "/student/transport", icon: Bus },
+  { label: "Fees", href: "/student/fees", icon: Wallet },
+  { label: "Leave Request", href: "/student/leave", icon: Plane },
+  { label: "Profile", href: "/student/profile", icon: User },
+  { label: "Settings", href: "/student/settings", icon: Settings },
+];
+
+function SidebarContent() {
+  const pathname = usePathname();
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-5 border-b border-slate-200 dark:border-[#243044]">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">SE</div>
+          <div><p className="font-bold leading-none text-slate-900 dark:text-[#F8FAFC]">Student ERP</p><p className="text-xs text-slate-500 dark:text-[#94A3B8]">Academic Portal</p></div>
+        </div>
+      </div>
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {nav.map((item, i) => {
+          if (item.heading) return <p key={i} className="text-[11px] font-semibold tracking-widest text-slate-400 dark:text-[#94A3B8] uppercase mt-4 mb-2 px-2">{item.label}</p>;
+          const Icon = item.icon; const active = pathname === item.href;
+          return <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition min-h-[44px] border ${active ? "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" : "text-slate-600 dark:text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-[#1E293B] border-transparent"}`}><Icon className="w-[18px] h-[18px] shrink-0" />{item.label}</Link>;
+        })}
+      </nav>
+    </div>
+  );
+}
+
+export default function StudentLayout({ children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex min-h-screen bg-[#f8fafc] dark:bg-[#0B1120] transition-colors">
+      <Sidebar />
+      <MobileSidebar open={open} onClose={() => setOpen(false)}><SidebarContent /></MobileSidebar>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <Navbar onMenu={() => setOpen(true)} />
+        <main className="flex-1 p-3 sm:p-6 pb-20 lg:pb-6 overflow-x-hidden">{children}</main>
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
