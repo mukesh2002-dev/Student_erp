@@ -3,15 +3,25 @@ import { useState, useEffect } from "react";
 import { initialLeaveRequests } from "@/data/leave";
 import Badge from "@/components/Badge";
 
+function readSavedLeaves() {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(localStorage.getItem("leaveRequests") || "null");
+  } catch {
+    return null;
+  }
+}
+
 export default function LeavePage() {
-  const [requests, setRequests] = useState(initialLeaveRequests);
+  const [requests, setRequests] = useState(() => readSavedLeaves() || initialLeaveRequests);
   const [form, setForm] = useState({ type: "Sick Leave", from: "", to: "", reason: "" });
 
+  // Persist to external system (localStorage) — no setState here, allowed.
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("leaveRequests") || "null");
-    if (saved) setRequests(saved);
-  }, []);
-  useEffect(() => { localStorage.setItem("leaveRequests", JSON.stringify(requests)); }, [requests]);
+    try {
+      localStorage.setItem("leaveRequests", JSON.stringify(requests));
+    } catch {}
+  }, [requests]);
 
   const submit = (e) => {
     e.preventDefault();

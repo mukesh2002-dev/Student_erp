@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { homework, hwStats } from "@/data/homework";
 import Badge from "@/components/Badge";
 import { Search, Upload, Eye, Calendar, Award, X } from "lucide-react";
@@ -10,12 +10,14 @@ export default function HomeworkPage() {
   const [filterStatus, setFilterStatus] = useState("All");
   const [selected, setSelected] = useState(null);
   const [answer, setAnswer] = useState("");
-  const [submittedIds, setSubmittedIds] = useState([]);
-
-  useEffect(() => {
-    const s = JSON.parse(localStorage.getItem("homeworkSubmissions") || "[]");
-    setSubmittedIds(s);
-  }, []);
+  const [submittedIds, setSubmittedIds] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("homeworkSubmissions") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   const subjects = ["All", ...new Set(homework.map(h => h.subject))];
   const filtered = homework.filter(h => {

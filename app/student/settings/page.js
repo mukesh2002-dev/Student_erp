@@ -3,24 +3,36 @@ import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { Sun, Moon, Monitor } from "lucide-react";
 
-export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();
-  const [settings, setSettings] = useState({ hwNotif: true, examNotif: true, resultNotif: true, noticeNotif: true, messageNotif: true, lang: "English" });
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("studentSettings") || "null");
-    if (saved) setSettings(s => ({ ...s, ...saved }));
-  }, []);
-  useEffect(() => {
-    localStorage.setItem("studentSettings", JSON.stringify(settings));
-  }, [settings]);
-
-  const Toggle = ({ label, value, onChange }) => (
+function Toggle({ label, value, onChange }) {
+  return (
     <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-[#172033] rounded-xl border border-slate-200 dark:border-[#243044]">
       <span className="text-sm font-medium text-slate-900 dark:text-[#F8FAFC]">{label}</span>
       <button onClick={() => onChange(!value)} aria-label={label} className={`w-12 h-7 rounded-full p-1 transition flex ${value ? "bg-indigo-600 justify-end" : "bg-slate-300 dark:bg-[#334155] justify-start"}`}><span className="w-5 h-5 bg-white rounded-full shadow" /></button>
     </div>
   );
+}
+
+function readSavedSettings() {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(localStorage.getItem("studentSettings") || "null");
+  } catch {
+    return null;
+  }
+}
+
+const DEFAULT_SETTINGS = { hwNotif: true, examNotif: true, resultNotif: true, noticeNotif: true, messageNotif: true, lang: "English" };
+
+export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const [settings, setSettings] = useState(() => ({ ...DEFAULT_SETTINGS, ...(readSavedSettings() || {}) }));
+
+  // Persist to external system (localStorage) — no setState here, allowed.
+  useEffect(() => {
+    try {
+      localStorage.setItem("studentSettings", JSON.stringify(settings));
+    } catch {}
+  }, [settings]);
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto w-full min-w-0 overflow-x-hidden">

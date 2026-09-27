@@ -1,55 +1,91 @@
 "use client";
-import { feesData } from "@/data/fees";
-import Badge from "@/components/Badge";
 import { Wallet, CreditCard, Receipt, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useFees, useFeesHistory, usePayFees } from "@/hooks/fees/useFees";
+import { PageHeader, Card, CardBody, CardHeader, Table, Alert, PageLoader, ErrorState } from "@/components/ui";
+import { FeesSummaryCard } from "@/components/features/fees/FeesSummaryCard";
+import { FeesTable } from "@/components/features/fees/FeesTable";
+import { FeesPayButton } from "@/components/features/fees/FeesPayButton";
+import { formatINR } from "@/lib/formatters";
 
+/**
+ * Fees page — thin composition layer only.
+ * Data via TanStack Query (useFees), payment via usePayFees mutation.
+ * No raw fetch, no manual loading flags.
+ */
 export default function FeesPage() {
-  const [paid, setPaid] = useState(false);
+  const { data: fees, isLoading, isError, error, refetch } = useFees();
+  const { data: history } = useFeesHistory();
+  const payMutation = usePayFees();
+
+  if (isLoading) return <PageLoader message="Loading fees..." />;
+  if (isError) return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (!fees) return <ErrorState message="No fees data found." onRetry={() => refetch()} />;
+
+  const rows = (history || fees.history || []).map((h, i) => ({ id: h.receipt || i, ...h }));
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div><h1 className="text-2xl font-bold">Fees</h1><p className="text-sm text-slate-500">Fee breakdown and payment history</p></div>
+      <PageHeader title="Fees" description="Fee breakdown and payment history" />
 
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
-        <div className="grid sm:grid-cols-3 gap-4 text-center">
-          <div><p className="text-indigo-100 text-sm">Total Fees</p><p className="text-2xl font-bold">₹{feesData.total.toLocaleString()}</p></div>
-          <div><p className="text-indigo-100 text-sm">Paid</p><p className="text-2xl font-bold">₹{feesData.paid.toLocaleString()}</p></div>
-          <div className="bg-white/15 rounded-xl p-3"><p className="text-indigo-100 text-sm">Due</p><p className="text-2xl font-bold">₹{feesData.due.toLocaleString()}</p><p className="text-xs text-indigo-100">Due {feesData.nextDueDate}</p></div>
-        </div>
-        {feesData.due > 0 && <div className="mt-4 bg-amber-400 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-sm font-medium"><AlertCircle className="w-4 h-4" />₹{feesData.due} due by {feesData.nextDueDate} — Pay now to avoid late fee.</div>}
-      </div>
+      <FeesSummaryCard total={fees.total} paid={fees.paid} due={fees.due} nextDueDate={fees.nextDueDate} />
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {feesData.breakdown.map(f => (
-          <div key={f.name} className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044] flex items-center justify-between">
-            <div><p className="font-medium">{f.name}</p><p className="text-sm text-slate-500">₹{f.amount.toLocaleString()} • Paid ₹{f.paid.toLocaleString()}</p></div>
-            <Badge variant={f.status === "Paid" ? "success" : "warning"}>{f.status}</Badge>
+      {fees.due > 0 && (
+        <Alert variant="warning">
+          {formatINR(fees.due)} due by {fees.nextDueDate} — Pay now to avoid late fee.
+        </Alert>
+      )}
+
+      <FeesTable breakdown={fees.breakdown} />
+
+      <Card>
+        <CardHeader>
+          <h3 className="font-semibold">Make Payment (demo — no gateway)</h3>
+        </CardHeader>
+        <CardBody>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="p-4 border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 rounded-xl text-center">
+              <CreditCard className="w-8 h-8 mx-auto text-indigo-600" />
+              <p className="text-sm font-medium mt-2">Pay Online</p>
+              <p className="text-xs text-slate-500">UPI / Card / Net Banking</p>
+            </div>
+            <div className="p-4 border border-slate-200 dark:border-[#243044] rounded-xl text-center">
+              <Wallet className="w-8 h-8 mx-auto text-slate-400" />
+              <p className="text-sm font-medium mt-2">Pay at School</p>
+              <p className="text-xs text-slate-500">Cash / Cheque</p>
+            </div>
+            <div className="p-4 border border-slate-200 dark:border-[#243044] rounded-xl text-center">
+              <Receipt className="w-8 h-8 mx-auto text-slate-400" />
+              <p className="text-sm font-medium mt-2">Raise Query</p>
+              <p className="text-xs text-slate-500">Contact accounts</p>
+            </div>
           </div>
-        ))}
-      </div>
+          <FeesPayButton
+            due={fees.due}
+            paying={payMutation.isPending}
+            onPay={() => payMutation.mutate({ amount: fees.due, method: "Online" })}
+          />
+          <p className="text-xs text-slate-500 text-center mt-2 flex items-center justify-center gap-1">
+            <AlertCircle className="w-3 h-3" /> No real gateway — demo UI backed by /api/fees/pay
+          </p>
+        </CardBody>
+      </Card>
 
-      <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
-        <h3 className="font-semibold mb-4">Make Payment (UI only)</h3>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <div className="p-4 border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 rounded-xl text-center"><CreditCard className="w-8 h-8 mx-auto text-indigo-600" /><p className="text-sm font-medium mt-2">Pay Online</p><p className="text-xs text-slate-500">UPI / Card / Net Banking</p></div>
-          <div className="p-4 border border-slate-200 dark:border-[#243044] rounded-xl text-center"><Wallet className="w-8 h-8 mx-auto text-slate-400" /><p className="text-sm font-medium mt-2">Pay at School</p><p className="text-xs text-slate-500">Cash / Cheque</p></div>
-          <div className="p-4 border border-slate-200 dark:border-[#243044] rounded-xl text-center"><Receipt className="w-8 h-8 mx-auto text-slate-400" /><p className="text-sm font-medium mt-2">Raise Query</p><p className="text-xs text-slate-500">Contact accounts</p></div>
-        </div>
-        {!paid ? <button onClick={() => setPaid(true)} className="mt-4 w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700">Pay ₹{feesData.due.toLocaleString()} Now</button> : <p className="mt-4 text-center py-3 bg-emerald-50 text-emerald-700 rounded-xl font-medium">Payment simulated — receipt will be generated (demo).</p>}
-        <p className="text-xs text-slate-500 text-center mt-2">No real gateway — demo UI only</p>
-      </div>
-
-      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-[#243044] overflow-hidden">
-        <div className="p-5 border-b border-slate-200 dark:border-[#243044]"><h3 className="font-semibold">Payment History</h3></div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-[#172033]"><tr><th className="text-left p-3">Date</th><th className="text-left p-3">Particular</th><th className="text-right p-3">Amount</th><th className="text-center p-3">Method</th><th className="text-center p-3">Status</th></tr></thead>
-            <tbody>
-              {feesData.history.map((h, i) => <tr key={i} className="border-t border-slate-100 dark:border-[#243044]"><td className="p-3">{h.date}</td><td className="p-3">{h.particular}</td><td className="text-right p-3 font-medium">₹{h.amount}</td><td className="text-center p-3">{h.method}</td><td className="text-center p-3"><Badge variant="success">{h.status}</Badge></td></tr>)}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <h3 className="font-semibold">Payment History</h3>
+        </CardHeader>
+        <Table
+          columns={[
+            { key: "date", header: "Date" },
+            { key: "particular", header: "Particular" },
+            { key: "amount", header: "Amount", align: "right", render: (r) => <span className="font-medium">{formatINR(r.amount)}</span> },
+            { key: "method", header: "Method", align: "center" },
+            { key: "status", header: "Status", align: "center", render: (r) => <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">{r.status}</span> },
+          ]}
+          rows={rows}
+          emptyMessage="No payments yet."
+        />
+      </Card>
     </div>
   );
 }

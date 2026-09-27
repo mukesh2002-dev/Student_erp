@@ -3,6 +3,7 @@ import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import { BottomNav, MobileSidebar } from "@/components/MobileNav";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, BookMarked, FileText, CalendarDays, ClipboardCheck, HelpCircle, PenTool, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, Bus, ClipboardCheck as AssignIcon, Clock } from "lucide-react";
@@ -67,7 +68,9 @@ export default function StudentLayout({ children }) {
       <MobileSidebar open={open} onClose={() => setOpen(false)}><SidebarContent /></MobileSidebar>
       <div className="flex-1 min-w-0 flex flex-col">
         <Navbar onMenu={() => setOpen(true)} />
-        <main className="flex-1 p-3 sm:p-6 pb-20 lg:pb-6 overflow-x-hidden">{children}</main>
+        <main className="flex-1 p-3 sm:p-6 pb-20 lg:pb-6 overflow-x-hidden">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
       <BottomNav />
     </div>

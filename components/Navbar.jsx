@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, Bell, MessageCircle, Sun, Moon, Menu, Globe, LogOut, User, BarChart3, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,21 +26,19 @@ export default function Navbar({ onMenu }) {
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [lang, setLang] = useState("EN");
-  const [notifs, setNotifs] = useState([]);
+  const [notifs, setNotifs] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const n = JSON.parse(localStorage.getItem("notifications") || "null");
+      if (n) return n;
+    } catch {}
+    return [
+      { id: 1, title: "New homework in Mathematics", time: "2h ago", read: false },
+      { id: 2, title: "Unit Test on 30 Sep", time: "5h ago", read: false },
+      { id: 3, title: "Science result published", time: "1d ago", read: true },
+    ];
+  });
   const router = useRouter();
-
-  useEffect(() => {
-    const n = JSON.parse(localStorage.getItem("notifications") || "null");
-    if (n) setNotifs(n);
-    else {
-      const init = [
-        { id: 1, title: "New homework in Mathematics", time: "2h ago", read: false },
-        { id: 2, title: "Unit Test on 30 Sep", time: "5h ago", read: false },
-        { id: 3, title: "Science result published", time: "1d ago", read: true },
-      ];
-      setNotifs(init);
-    }
-  }, []);
 
   const toggleTheme = () => {
     setTheme(dark ? "light" : "dark");

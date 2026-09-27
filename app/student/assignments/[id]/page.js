@@ -3,7 +3,7 @@ import { useParams } from "next/navigation";
 import { assignments } from "@/data/assignments";
 import Badge from "@/components/Badge";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowLeft, Calendar, User, Award, Paperclip, Upload, CheckCircle, FileText, Clock } from "lucide-react";
 
 function getBadgeVariant(status) {
@@ -20,13 +20,16 @@ export default function AssignmentDetailPage() {
   const assignment = assignments.find(a => String(a.id) === String(id));
   const [text, setText] = useState("");
   const [files, setFiles] = useState([]);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const s = JSON.parse(localStorage.getItem("assignmentSubmissions") || "[]");
+      return s.includes(Number(id));
+    } catch {
+      return false;
+    }
+  });
   const [dateStr, setDateStr] = useState("");
-
-  useEffect(() => {
-    const s = JSON.parse(localStorage.getItem("assignmentSubmissions") || "[]");
-    if (s.includes(Number(id))) setSubmitted(true);
-  }, [id]);
 
   if (!assignment) return <div className="max-w-3xl mx-auto py-12 text-center"><p>Assignment not found</p><Link href="/student/assignments" className="text-indigo-600 text-sm">Back to Assignments</Link></div>;
 

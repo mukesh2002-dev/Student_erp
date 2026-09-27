@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { assignments, assignmentStats } from "@/data/assignments";
 import Badge from "@/components/Badge";
 import Link from "next/link";
@@ -30,11 +30,14 @@ export default function AssignmentsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [teacher, setTeacher] = useState("All");
   const [priority, setPriority] = useState("All");
-  const [submittedIds, setSubmittedIds] = useState([]);
-
-  useEffect(() => {
-    setSubmittedIds(JSON.parse(localStorage.getItem("assignmentSubmissions") || "[]"));
-  }, []);
+  const [submittedIds, setSubmittedIds] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("assignmentSubmissions") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   const subjects = useMemo(() => ["All", ...new Set(assignments.map(a => a.subject))], []);
   const teachers = useMemo(() => ["All", ...new Set(assignments.map(a => a.teacher))], []);

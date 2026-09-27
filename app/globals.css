@@ -111,3 +111,7 @@ img, video, canvas, svg { max-width: 100%; }
   color: var(--card-foreground);
   border: 1px solid var(--border);
 }
+
+/* nprogress theme */
+#nprogress .bar { background: #6366f1; height: 3px; }
+#nprogress .peg { box-shadow: 0 0 10px #6366f1, 0 0 5px #6366f1; }
