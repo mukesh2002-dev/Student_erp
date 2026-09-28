@@ -1,55 +1,74 @@
 "use client";
-import { useState } from "react";
-import { classwork, cwStats } from "@/data/classwork";
-import Badge from "@/components/Badge";
-import { Search } from "lucide-react";
+import { useStudentClasswork } from "@/hooks/student/useStudentPortal";
+import { PageHeader, CardSkeleton, ErrorState, EmptyState } from "@/components/ui";
+import ProgressBar from "@/components/ProgressBar";
+import { CheckCircle2, Circle } from "lucide-react";
 
+/**
+ * Classwork — percentage/progress ONLY (task.md).
+ * No marks columns, no extra data. Simple structured list.
+ */
 export default function ClassworkPage() {
-  const [q, setQ] = useState("");
-  const [filterSub, setFilterSub] = useState("All");
-  const [filterStatus, setFilterStatus] = useState("All");
-  const subjects = ["All", ...new Set(classwork.map(c => c.subject))];
-  const filtered = classwork.filter(c => {
-    const mQ = c.title.toLowerCase().includes(q.toLowerCase()) || c.subject.toLowerCase().includes(q.toLowerCase());
-    const mS = filterSub === "All" || c.subject === filterSub;
-    const mSt = filterStatus === "All" || c.status === filterStatus;
-    return mQ && mS && mSt;
-  });
-  return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div><h1 className="text-2xl font-bold">Class Work</h1><p className="text-sm text-slate-500">View classwork assigned by teachers</p></div>
+  const { data, isLoading, isError, refetch } = useStudentClasswork();
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044]"><p className="text-xs text-slate-500">Total CW</p><p className="text-2xl font-bold">{cwStats.total}</p></div>
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044]"><p className="text-xs text-slate-500">Completed</p><p className="text-2xl font-bold text-emerald-600">{cwStats.completed}</p></div>
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044]"><p className="text-xs text-slate-500">Pending</p><p className="text-2xl font-bold text-amber-600">{cwStats.pending}</p></div>
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044]"><p className="text-xs text-slate-500">Completion</p><p className="text-2xl font-bold text-indigo-600">{cwStats.completion}%</p></div>
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <PageHeader title="Classwork" description="Loading your progress…" />
+        <CardSkeleton />
       </div>
+    );
+  }
 
-      <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 border border-slate-200 dark:border-[#243044] flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search classwork..." className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] rounded-xl text-sm outline-none" />
+  if (isError || !data) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <PageHeader title="Classwork" />
+        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-[#243044]">
+          <ErrorState onRetry={() => refetch()} />
         </div>
-        <select value={filterSub} onChange={e => setFilterSub(e.target.value)} className="px-4 py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] rounded-xl text-sm outline-none">{subjects.map(s => <option key={s}>{s}</option>)}</select>
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="px-4 py-2.5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] rounded-xl text-sm outline-none"><option>All</option><option>Completed</option><option>Pending</option></select>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <PageHeader title="Classwork" description="Your completion progress" />
+
+      <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
+        <div className="flex items-center justify-between mb-2">
+          <p className="font-semibold text-slate-900 dark:text-white">Overall progress</p>
+          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-300">{data.percentage}%</p>
+        </div>
+        <ProgressBar value={data.percentage} color="indigo" />
+        <p className="text-xs text-slate-500 mt-2">{data.completed} of {data.total} completed</p>
       </div>
 
-      <div className="grid gap-3">
-        {filtered.map(c => (
-          <div key={c.id} className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-[#243044] flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold">{c.title}</p>
-              <p className="text-xs text-slate-500 mt-1">{c.subject} • {c.chapter} • {c.teacher} • {c.date}</p>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="text-sm font-medium">{c.marks}</span>
-              <Badge variant={c.status === "Completed" ? "success" : "warning"}>{c.status}</Badge>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700">View</button>
-            </div>
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-[#243044] overflow-hidden">
+        {data.items.length === 0 ? (
+          <EmptyState title="No classwork yet" message="Your classwork will appear here." />
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-[#243044]">
+            {data.items.map((item) => (
+              <div key={item.uuid} className="flex items-center gap-3 p-4">
+                {item.completed ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                ) : (
+                  <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">{item.title}</p>
+                  <p className="text-xs text-slate-500">
+                    Due {item.dueDate ? new Date(item.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                  </p>
+                </div>
+                <span className={`text-[11px] px-2.5 py-1 rounded-full font-medium ${item.completed ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-slate-100 text-slate-600 dark:bg-[#1E293B] dark:text-slate-300"}`}>
+                  {item.completed ? "Done" : "Pending"}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-        {filtered.length === 0 && <p className="text-center py-8 text-slate-500">No classwork found</p>}
+        )}
       </div>
     </div>
   );

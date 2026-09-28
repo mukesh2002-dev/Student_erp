@@ -6,7 +6,7 @@ import { BottomNav, MobileSidebar } from "@/components/MobileNav";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, BookMarked, FileText, CalendarDays, ClipboardCheck, HelpCircle, PenTool, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, Bus, ClipboardCheck as AssignIcon, Clock } from "lucide-react";
+import { LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, FileText, CalendarDays, ClipboardCheck, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, Bus, ClipboardCheck as AssignIcon, Clock } from "lucide-react";
 
 const nav = [
   { label: "Dashboard", href: "/student", icon: LayoutDashboard },
@@ -17,14 +17,11 @@ const nav = [
   { label: "Home Work", href: "/student/homework", icon: Home },
   { label: "Assignments", href: "/student/assignments", icon: AssignIcon },
   { label: "Topics / Syllabus", href: "/student/topics", icon: Library },
-  { label: "Study Materials", href: "/student/materials", icon: BookMarked },
   { label: "Timetable", href: "/student/timetable", icon: Clock },
   { label: "Attendance", heading: true },
   { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
   { label: "Examination", heading: true },
   { label: "Exams", href: "/student/exams", icon: FileText },
-  { label: "Question Bank", href: "/student/question-bank", icon: HelpCircle },
-  { label: "Practice Tests", href: "/student/practice-tests", icon: PenTool },
   { label: "Results", href: "/student/results", icon: BarChart3 },
   { label: "Report Card", href: "/student/report-card", icon: Award },
   { label: "Communication", heading: true },

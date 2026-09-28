@@ -1,66 +1,96 @@
 "use client";
-import { student } from "@/data/student";
-import { useState } from "react";
+import { useStudentHeader } from "@/hooks/student/useStudentPortal";
+import { PageHeader, CardSkeleton, ErrorState } from "@/components/ui";
 
+function Row({ label, value }) {
+  return (
+    <div className="flex justify-between gap-3 p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl text-sm">
+      <span className="text-slate-500 shrink-0">{label}</span>
+      <span className="font-medium text-right text-slate-900 dark:text-slate-100">{value || "—"}</span>
+    </div>
+  );
+}
+
+function fmtDate(v) {
+  if (!v) return "—";
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/**
+ * My profile — simple + fully dynamic (task.md).
+ * Live data from the dedicated header API. Read-only.
+ */
 export default function ProfilePage() {
-  const [edit, setEdit] = useState(false);
-  const [address, setAddress] = useState(student.address);
-  const [phone, setPhone] = useState(student.parentPhone);
+  const { data: s, isLoading, isError, refetch } = useStudentHeader();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <PageHeader title="My Profile" description="Loading…" />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    );
+  }
+
+  if (isError || !s) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <PageHeader title="My Profile" />
+        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-[#243044]">
+          <ErrorState onRetry={() => refetch()} />
+        </div>
+      </div>
+    );
+  }
+
+  const avatarSrc = s.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(s.name || "Student")}`;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold">My Profile</h1><p className="text-sm text-slate-500">Your personal and academic information</p></div>
-        <button onClick={() => setEdit(!edit)} className={`px-5 py-2.5 rounded-xl text-sm font-medium ${edit ? "bg-emerald-600 text-white" : "bg-indigo-600 text-white"}`}>{edit ? "Save" : "Edit Profile"}</button>
-      </div>
+      <PageHeader title="My Profile" description="Your personal and academic information" />
 
       <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044] flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-        <img src="https://api.dicebear.com/9.x/initials/svg?seed=Aman%20Kumar" alt="avatar" className="w-24 h-24 rounded-3xl bg-indigo-100 object-cover border-4 border-indigo-100 dark:border-indigo-900" />
+        <img src={avatarSrc} alt="avatar" className="w-24 h-24 rounded-3xl bg-indigo-100 object-cover border-4 border-indigo-100 dark:border-indigo-900" />
         <div>
-          <h2 className="text-xl font-bold">{student.name}</h2>
-          <p className="text-sm text-slate-500">{student.class} • Roll {student.rollNumber} • {student.house}</p>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{s.name}</h2>
+          <p className="text-sm text-slate-500">
+            {[s.class ? `Class ${s.class.name}${s.class.section ? `-${s.class.section}` : ""}` : null,
+              s.rollNo ? `Roll ${s.rollNo}` : null,
+              s.campus?.name].filter(Boolean).join(" • ")}
+          </p>
           <div className="flex flex-wrap gap-2 mt-3">
-            <span className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium">{student.studentId}</span>
-            <span className="text-xs bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] px-3 py-1 rounded-full font-medium">{student.admissionNo}</span>
-            <span className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-medium">{student.academicSession}</span>
+            <span className="text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 px-3 py-1 rounded-full font-medium">{s.admissionNo}</span>
+            {s.category && (
+              <span className="text-xs bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] px-3 py-1 rounded-full font-medium">{s.category}</span>
+            )}
           </div>
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
-          <h3 className="font-semibold mb-4">Student Details</h3>
-          <div className="space-y-3 text-sm">
-            {[
-              ["Student ID", student.studentId],
-              ["Admission No", student.admissionNo],
-              ["Class", student.class],
-              ["Section", student.section],
-              ["Roll Number", student.rollNumber],
-              ["Date of Birth", student.dob],
-              ["Gender", student.gender],
-              ["Blood Group", student.bloodGroup],
-              ["House", student.house],
-            ].map(([k, v]) => <div key={k} className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">{k}</span><span className="font-medium">{v}</span></div>)}
+          <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Student Details</h3>
+          <div className="space-y-3">
+            <Row label="Admission No" value={s.admissionNo} />
+            <Row label="Class" value={s.class ? `${s.class.name}${s.class.section ? `-${s.class.section}` : ""}` : null} />
+            <Row label="Roll Number" value={s.rollNo} />
+            <Row label="Date of Birth" value={fmtDate(s.dob)} />
+            <Row label="Gender" value={s.gender} />
+            <Row label="Blood Group" value={s.bloodGroup} />
+            <Row label="Admission Date" value={fmtDate(s.admissionDate)} />
           </div>
         </div>
 
         <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
-          <h3 className="font-semibold mb-4">Parent & Contact</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">Father</span><span className="font-medium">{student.father}</span></div>
-            <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">Mother</span><span className="font-medium">{student.mother}</span></div>
-            <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl items-center"><span className="text-slate-500">Parent Phone</span>{edit ? <input value={phone} onChange={e => setPhone(e.target.value)} className="font-medium bg-white dark:bg-[#111827] border border-indigo-200 rounded-lg px-2 py-1 text-sm w-36 text-right" /> : <span className="font-medium">{phone}</span>}</div>
-            <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">Student Email</span><span className="font-medium text-xs">{student.email}</span></div>
-            <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl items-center"><span className="text-slate-500">Address</span>{edit ? <input value={address} onChange={e => setAddress(e.target.value)} className="font-medium bg-white dark:bg-[#111827] border border-indigo-200 rounded-lg px-2 py-1 text-sm w-36 text-right" /> : <span className="font-medium">{address}</span>}</div>
-          </div>
-          <div className="mt-6">
-            <h4 className="font-semibold mb-3">Academic Information</h4>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between p-2.5 bg-indigo-50 dark:bg-indigo-950 rounded-xl"><span className="text-slate-500">Class Teacher</span><span className="font-medium">{student.classTeacher}</span></div>
-              <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">Admission Date</span><span className="font-medium">{student.admissionDate}</span></div>
-              <div className="flex justify-between p-2.5 bg-slate-50 dark:bg-[#172033] rounded-xl"><span className="text-slate-500">Session</span><span className="font-medium">{student.academicSession}</span></div>
-            </div>
+          <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Guardian & Contact</h3>
+          <div className="space-y-3">
+            <Row label="Guardian" value={s.guardianName} />
+            <Row label="Guardian Phone" value={s.guardianPhone} />
+            <Row label="Guardian Email" value={s.guardianEmail} />
+            <Row label="Address" value={[s.address, s.city, s.state].filter(Boolean).join(", ")} />
+            <Row label="Campus" value={s.campus?.name} />
           </div>
         </div>
       </div>

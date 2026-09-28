@@ -4,15 +4,15 @@ import { Search, Bell, MessageCircle, Sun, Moon, Menu, Globe, LogOut, User, BarC
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
+import { useStudentHeader } from "@/hooks/student/useStudentPortal";
+import { Skeleton } from "@/components/ui";
 
 const searchable = [
   { label: "Mathematics - Quadratic Equations", href: "/student/subjects" },
   { label: "Science - Life Processes", href: "/student/subjects" },
   { label: "Quadratic Equation Practice - Homework", href: "/student/homework" },
   { label: "Geometry Questions - Classwork", href: "/student/classwork" },
-  { label: "Quadratic Equations Notes.pdf", href: "/student/materials" },
   { label: "Unit Test 1 - Mathematics", href: "/student/exams" },
-  { label: "Practice Test - Mathematics", href: "/student/practice-tests" },
   { label: "PTM Notice", href: "/student/notices" },
   { label: "Attendance", href: "/student/attendance" },
   { label: "Results", href: "/student/results" },
@@ -21,6 +21,12 @@ const searchable = [
 export default function Navbar({ onMenu }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const dark = resolvedTheme === "dark";
+  // Dedicated header API (task.md): name, class, photo, campus — never bundled.
+  const { data: header, isLoading: headerLoading } = useStudentHeader();
+  const displayName = header?.name || "Student";
+  const classLabel = header?.class ? `${header.class.name}${header.class.section ? `-${header.class.section}` : ""}` : "";
+  const avatarSrc =
+    header?.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
   const [query, setQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
@@ -107,16 +113,29 @@ export default function Navbar({ onMenu }) {
           <Link href="/student/messages" className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#1E293B] text-slate-700 dark:text-slate-200 hidden sm:flex min-h-[44px] min-w-[44px] items-center justify-center"><MessageCircle className="w-5 h-5" /></Link>
 
           <div className="relative">
-            <button onClick={() => setShowProfile(v => !v)} className="flex items-center gap-3 pl-2 min-h-[44px]">
+            <button onClick={() => setShowProfile(v => !v)} className="flex items-center gap-3 pl-2 min-h-[44px]" aria-label="Profile menu">
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">Aman Kumar</p><p className="text-xs text-slate-500 dark:text-slate-400">10-A • Roll 01</p>
+                {headerLoading ? (
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3.5 w-24 ml-auto" />
+                    <Skeleton className="h-3 w-16 ml-auto" />
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold leading-none text-slate-900 dark:text-slate-100">{displayName}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{classLabel}</p>
+                  </>
+                )}
               </div>
-              <img src="https://api.dicebear.com/9.x/initials/svg?seed=Aman%20Kumar" alt="avatar" className="w-9 h-9 rounded-full bg-indigo-100 object-cover border border-slate-200 dark:border-[#243044]" />
+              <img src={avatarSrc} alt="avatar" className="w-9 h-9 rounded-full bg-indigo-100 object-cover border border-slate-200 dark:border-[#243044]" />
             </button>
             {showProfile && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#243044] rounded-2xl shadow-xl overflow-hidden z-50">
                 <div className="p-4 border-b border-slate-200 dark:border-[#243044]">
-                  <p className="font-semibold text-slate-900 dark:text-slate-100">Aman Kumar</p><p className="text-xs text-slate-500 dark:text-slate-400">aman.kumar@student.demo</p>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{displayName}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {[classLabel, header?.campus?.name].filter(Boolean).join(" • ") || "Student"}
+                  </p>
                 </div>
                 <div className="p-2 space-y-1">
                   <Link href="/student/profile" onClick={() => setShowProfile(false)} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#172033] text-sm text-slate-700 dark:text-slate-300"><User className="w-4 h-4" />My Profile</Link>

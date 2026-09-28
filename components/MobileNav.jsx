@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Clock, ClipboardCheck, Home, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { ClipboardList, Library, BookMarked, FileText, HelpCircle, PenTool, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, BookOpen, GraduationCap, BarChart3, Bus } from "lucide-react";
+import { ClipboardList, Library, FileText, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, BookOpen, GraduationCap, BarChart3, Bus } from "lucide-react";
 
 const bottomNav = [
   { label: "Home", href: "/student", icon: LayoutDashboard },
@@ -18,11 +18,8 @@ const moreLinks = [
   { label: "Subjects", href: "/student/subjects", icon: BookOpen },
   { label: "Class Work", href: "/student/classwork", icon: ClipboardList },
   { label: "Topics", href: "/student/topics", icon: Library },
-  { label: "Materials", href: "/student/materials", icon: BookMarked },
   { label: "Attendance", href: "/student/attendance", icon: ClipboardList },
   { label: "Exams", href: "/student/exams", icon: FileText },
-  { label: "Question Bank", href: "/student/question-bank", icon: HelpCircle },
-  { label: "Practice Tests", href: "/student/practice-tests", icon: PenTool },
   { label: "Results", href: "/student/results", icon: BarChart3 },
   { label: "Report Card", href: "/student/report-card", icon: Award },
   { label: "Transport", href: "/student/transport", icon: Bus },
