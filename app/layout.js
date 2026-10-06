@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
             in Next.js 16 App Router. See AGENTS.md. */}
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-screen antialiased overflow-x-hidden" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+      <body suppressHydrationWarning className="min-h-screen antialiased overflow-x-hidden" style={{ background: "var(--background)", color: "var(--foreground)" }}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
