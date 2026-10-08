@@ -18,8 +18,12 @@ export default function TimetablePage() {
   const { data, isLoading, isError, refetch } = useStudentTimetable();
   const week = useMemo(() => data?.week || [], [data]);
   const availableDays = useMemo(() => week.map((d) => d.day), [week]);
+  // Default to today's tab (if classes scheduled), else first available day.
+  const todayName = ALL_DAYS[(new Date().getDay() + 6) % 7];
   const [selectedDay, setSelectedDay] = useState(null);
-  const activeDay = selectedDay && availableDays.includes(selectedDay) ? selectedDay : availableDays[0];
+  const activeDay = selectedDay && availableDays.includes(selectedDay)
+    ? selectedDay
+    : availableDays.includes(todayName) ? todayName : availableDays[0];
   const activeSlots = week.find((d) => d.day === activeDay)?.slots || [];
 
   return (
@@ -56,7 +60,10 @@ export default function TimetablePage() {
 
           <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-[#243044] overflow-hidden">
             <div className="p-5 border-b border-slate-200 dark:border-[#243044] flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900 dark:text-white">{prettyDay(activeDay || "")}</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">
+                {prettyDay(activeDay || "")}
+                {activeDay === todayName && <span className="ml-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300">Today</span>}
+              </h3>
               <Badge variant="indigo">{activeSlots.length} periods</Badge>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-[#243044]">

@@ -13,4 +13,9 @@ export const studentService = {
   getClasswork: () => backendApi.get("/student/classwork"),
   getHomework: () => backendApi.get("/student/homework"),
   getTimetable: () => backendApi.get("/student/timetable"),
+  getAttendance: (month, year) => backendApi.get("/student/attendance", { params: { month, year } }),
+  getCalendar: (month, year) => backendApi.get("/student/calendar", { params: { month, year } }),
+  getSyllabus: () => backendApi.get("/student/syllabus"),
+  getExams: () => backendApi.get("/student/exams"),
+  getTransport: () => backendApi.get("/student/transport"),
 };
