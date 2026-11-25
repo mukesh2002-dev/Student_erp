@@ -2,22 +2,25 @@ import { Info, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tones = {
-  info: { icon: Info, cls: "bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-200 dark:border-blue-900/50" },
-  success: { icon: CheckCircle2, cls: "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-900/50" },
-  warning: { icon: AlertTriangle, cls: "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-900/50" },
-  error: { icon: XCircle, cls: "bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-200 dark:border-red-900/50" },
+  info: { icon: Info, cls: "border-hairline bg-accent-soft text-ink", rule: "bg-accent" },
+  success: { icon: CheckCircle2, cls: "border-hairline bg-positive-soft text-ink", rule: "bg-positive" },
+  warning: { icon: AlertTriangle, cls: "border-hairline bg-warning-soft text-ink", rule: "bg-warning" },
+  error: { icon: XCircle, cls: "border-hairline bg-negative-soft text-ink", rule: "bg-negative" },
 };
 
-/** Inline alert. */
+/** Inline alert with a coloured rule, not a coloured box. */
 export function Alert({ variant = "info", title, children, className }) {
-  const t = tones[variant] || tones.info;
-  const Icon = t.icon;
+  const tone = tones[variant] || tones.info;
+  const Icon = tone.icon;
   return (
-    <div className={cn("flex gap-3 rounded-xl border p-4 text-sm", t.cls, className)} role="alert">
-      <Icon className="w-5 h-5 shrink-0" />
-      <div>
-        {title && <p className="font-semibold">{title}</p>}
-        <div>{children}</div>
+    <div className={cn("relative overflow-hidden rounded-lg border px-4 py-3 pl-5 text-[13px]", tone.cls, className)} role="alert">
+      <span className={cn("absolute inset-y-0 left-0 w-[2px]", tone.rule)} aria-hidden />
+      <div className="flex gap-2.5">
+        <Icon className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.5} />
+        <div className="min-w-0">
+          {title && <p className="font-medium text-ink">{title}</p>}
+          <div className={title ? "mt-0.5 text-ink-secondary" : "text-ink-secondary"}>{children}</div>
+        </div>
       </div>
     </div>
   );

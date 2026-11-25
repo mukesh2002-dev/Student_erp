@@ -1,68 +1,146 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, FileText, ClipboardCheck, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User, Settings, Bus, Clock } from "lucide-react";
+import {
+  LayoutDashboard, GraduationCap, BookOpen, ClipboardList, Home, Library, FileText,
+  ClipboardCheck, BarChart3, Award, Wallet, Bell, MessageCircle, Calendar, Plane, User,
+  Settings, Bus, Clock, ArrowRight,
+} from "lucide-react";
+import { student } from "@/data/student";
 
-const nav = [
-  { label: "Dashboard", href: "/student", icon: LayoutDashboard },
-  { label: "Academic", heading: true },
-  { label: "My Classes", href: "/student/classes", icon: GraduationCap },
-  { label: "Subjects", href: "/student/subjects", icon: BookOpen },
-  { label: "Class Work", href: "/student/classwork", icon: ClipboardList },
-  { label: "Home Work", href: "/student/homework", icon: Home },
-  { label: "Assignments", href: "/student/assignments", icon: ClipboardCheck },
-  { label: "Topics / Syllabus", href: "/student/topics", icon: Library },
-  { label: "Timetable", href: "/student/timetable", icon: Clock },
-  { label: "Attendance", heading: true },
-  { label: "My Attendance", href: "/student/attendance", icon: ClipboardCheck },
-  { label: "Examination", heading: true },
-  { label: "Exams", href: "/student/exams", icon: FileText },
-  { label: "Results", href: "/student/results", icon: BarChart3 },
-  { label: "Report Card", href: "/student/report-card", icon: Award },
-  { label: "Communication", heading: true },
-  { label: "Notices", href: "/student/notices", icon: Bell },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Calendar", href: "/student/calendar", icon: Calendar },
-  { label: "Other", heading: true },
-  { label: "Transport", href: "/student/transport", icon: Bus },
-  { label: "Fees", href: "/student/fees", icon: Wallet },
-  { label: "Leave Request", href: "/student/leave", icon: Plane },
-  { label: "Profile", href: "/student/profile", icon: User },
-  { label: "Settings", href: "/student/settings", icon: Settings },
+const primary = { label: "Dashboard", href: "/student", icon: LayoutDashboard };
+
+const groups = [
+  {
+    heading: "Academic",
+    items: [
+      { label: "My class", href: "/student/classes", icon: GraduationCap },
+      { label: "Subjects", href: "/student/subjects", icon: BookOpen },
+      { label: "Classwork", href: "/student/classwork", icon: ClipboardList },
+      { label: "Homework", href: "/student/homework", icon: Home },
+      { label: "Assignments", href: "/student/assignments", icon: ClipboardCheck },
+      { label: "Syllabus", href: "/student/topics", icon: Library },
+      { label: "Timetable", href: "/student/timetable", icon: Clock },
+    ],
+  },
+  {
+    heading: "Attendance",
+    items: [{ label: "Attendance", href: "/student/attendance", icon: ClipboardCheck }],
+  },
+  {
+    heading: "Examinations",
+    items: [
+      { label: "Exams", href: "/student/exams", icon: FileText },
+      { label: "Results", href: "/student/results", icon: BarChart3 },
+      { label: "Report card", href: "/student/report-card", icon: Award },
+    ],
+  },
+  {
+    heading: "Communication",
+    items: [
+      { label: "Notices", href: "/student/notices", icon: Bell },
+      { label: "Messages", href: "/student/messages", icon: MessageCircle },
+      { label: "Calendar", href: "/student/calendar", icon: Calendar },
+    ],
+  },
+  {
+    heading: "Services",
+    items: [
+      { label: "Transport", href: "/student/transport", icon: Bus },
+      { label: "Fees", href: "/student/fees", icon: Wallet },
+      { label: "Leave request", href: "/student/leave", icon: Plane },
+    ],
+  },
+  {
+    heading: "Account",
+    items: [
+      { label: "Profile", href: "/student/profile", icon: User },
+      { label: "Settings", href: "/student/settings", icon: Settings },
+    ],
+  },
 ];
 
-export default function Sidebar() {
+function isActive(pathname, href) {
+  return href === "/student" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavItem({ item, pathname, onNavigate }) {
+  const Icon = item.icon;
+  const active = isActive(pathname, item.href);
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex h-10 items-center gap-2.5 rounded-lg px-2.5 text-[13px] transition-colors lg:h-9 ${
+        active
+          ? "bg-surface-sunken font-medium text-ink"
+          : "text-ink-secondary hover:bg-surface-raised hover:text-ink"
+      }`}
+    >
+      <Icon
+        className={`h-[18px] w-[18px] shrink-0 ${active ? "text-ink" : "text-ink-muted"}`}
+        strokeWidth={1.5}
+      />
+      <span className="truncate">{item.label}</span>
+      {active && (
+        <span className="absolute inset-y-1.5 left-0 w-[2px] rounded-full bg-accent" aria-hidden />
+      )}
+    </Link>
+  );
+}
+
+/** Shared sidebar body, used by the desktop rail and the mobile drawer. */
+export function SidebarPanel({ onNavigate }) {
   const pathname = usePathname();
   return (
-    <aside className="hidden lg:flex w-[260px] shrink-0 flex-col bg-white dark:bg-[#0F172A] border-r border-slate-200 dark:border-[#243044] sticky top-0 h-screen overflow-y-auto">
-      <div className="p-5 border-b border-slate-200 dark:border-[#243044]">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">SE</div>
-          <div>
-            <p className="font-bold text-slate-900 dark:text-[#F8FAFC] leading-none">Student ERP</p>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">Academic Portal</p>
+    <div className="flex h-full flex-col">
+      <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-hairline px-4">
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-ink text-[10px] font-medium tracking-wide text-canvas">
+          SE
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-[15px] font-medium leading-5 text-ink">Student ERP</p>
+          <p className="truncate text-[11px] leading-4 text-ink-muted">Academic portal</p>
+        </div>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto px-2 py-3">
+        <NavItem item={primary} pathname={pathname} onNavigate={onNavigate} />
+        {groups.map((group) => (
+          <div key={group.heading}>
+            <p className="px-2 pb-2 pt-6 text-[11px] font-medium leading-4 text-ink-muted">
+              {group.heading}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => (
+                <NavItem key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {nav.map((item, i) => {
-          if (item.heading) return <p key={i} className="text-[11px] font-semibold tracking-widest text-slate-400 dark:text-[#94A3B8] uppercase mt-4 mb-2 px-2">{item.label}</p>;
-          const Icon = item.icon;
-          const active = pathname === item.href;
-          return (
-            <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${active ? "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" : "text-slate-600 dark:text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-[#1E293B] hover:text-slate-900 dark:hover:text-[#F8FAFC] border border-transparent"}`}>
-              <Icon className="w-[18px] h-[18px] shrink-0" />
-              {item.label}
-            </Link>
-          );
-        })}
+        ))}
       </nav>
-      <div className="p-4 border-t border-slate-200 dark:border-[#243044]">
-        <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl p-4 border border-indigo-100 dark:border-indigo-900/50">
-          <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Need Help?</p>
-          <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">Contact class teacher Rajesh Kumar</p>
-        </div>
+
+      <div className="shrink-0 border-t border-hairline p-4">
+        <p className="record">Class teacher</p>
+        <p className="mt-1 text-[13px] font-medium text-ink">{student.classTeacher}</p>
+        <Link
+          href="/student/messages"
+          onClick={onNavigate}
+          className="mt-2 inline-flex items-center gap-1 text-xs text-ink-muted transition-colors hover:text-ink"
+        >
+          Send a message
+          <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
+        </Link>
       </div>
+    </div>
+  );
+}
+
+export default function Sidebar() {
+  return (
+    <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[264px] lg:shrink-0 lg:flex-col lg:border-r lg:border-hairline lg:bg-surface">
+      <SidebarPanel />
     </aside>
   );
 }

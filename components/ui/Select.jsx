@@ -9,21 +9,21 @@ export function Select({ label, error, className, children, id, ...rest }) {
   return (
     <div className={cn("space-y-1.5", className)}>
       {label && (
-        <label htmlFor={selectId} className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        <label htmlFor={selectId} className="block text-[13px] font-medium text-ink-secondary">
           {label}
         </label>
       )}
       <select
         id={selectId}
         className={cn(
-          "w-full rounded-xl border bg-white dark:bg-[#111827] px-4 py-2.5 text-sm outline-none text-slate-900 dark:text-slate-100",
-          error ? "border-red-400" : "border-slate-200 dark:border-[#334155] focus:border-indigo-500"
+          "h-10 w-full rounded-lg border bg-surface px-3 text-[13px] text-ink outline-none transition-colors",
+          error ? "border-negative/50 focus:border-negative" : "border-hairline focus:border-hairline-strong"
         )}
         {...rest}
       >
         {children}
       </select>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-negative">{error}</p>}
     </div>
   );
 }

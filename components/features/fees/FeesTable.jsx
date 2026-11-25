@@ -1,24 +1,15 @@
-import { Card, CardBody } from "@/components/ui";
+import { Table } from "@/components/ui";
 import { formatINR } from "@/lib/formatters";
 import { FeesBadge } from "./FeesBadge";
 
-/** Fee breakdown grid. */
+const columns = [
+  { key: "name", header: "Particular", render: (row) => <span className="font-medium text-ink">{row.name}</span> },
+  { key: "amount", header: "Billed", align: "right", render: (row) => <span className="tabular-nums">{formatINR(row.amount)}</span> },
+  { key: "paid", header: "Paid", align: "right", render: (row) => <span className="tabular-nums">{formatINR(row.paid)}</span> },
+  { key: "status", header: "Status", align: "center", render: (row) => <FeesBadge status={row.status} /> },
+];
+
+/** Fee breakdown as a ledger, not a wall of cards. */
 export function FeesTable({ breakdown = [] }) {
-  return (
-    <div className="grid sm:grid-cols-2 gap-4">
-      {breakdown.map((f) => (
-        <Card key={f.name}>
-          <CardBody className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">{f.name}</p>
-              <p className="text-sm text-slate-500">
-                {formatINR(f.amount)} • Paid {formatINR(f.paid)}
-              </p>
-            </div>
-            <FeesBadge status={f.status} />
-          </CardBody>
-        </Card>
-      ))}
-    </div>
-  );
+  return <Table columns={columns} rows={breakdown} emptyMessage="No fee heads configured" />;
 }

@@ -1,6 +1,22 @@
 import "./globals.css";
 import "nprogress/nprogress.css";
+import Script from "next/script";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import AppProviders from "@/providers/AppProviders";
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
 export const metadata = {
   title: "Student ERP — Student Academic Portal",
@@ -12,14 +28,15 @@ const themeScript = `(function(){try{var k='student-erp-theme';var t=localStorag
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${plexSans.variable} ${plexMono.variable}`}>
       <head>
-        {/* Plain inline script — runs synchronously before paint to prevent theme flash.
-            Do NOT use next/script here; it causes "script outside main document" errors
-            in Next.js 16 App Router. See AGENTS.md. */}
-        <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Runs before hydration so the stored theme is on <html> before first paint.
+            Must be next/script (not a raw <script>) — see AGENTS.md. */}
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
       </head>
-      <body suppressHydrationWarning className="min-h-screen antialiased overflow-x-hidden" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+      <body suppressHydrationWarning className="min-h-screen overflow-x-hidden bg-canvas text-ink antialiased">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

@@ -1,23 +1,30 @@
 import { formatINR } from "@/lib/formatters";
 
-/** Summary banner: total / paid / due. */
+/** Ledger strip: billed, paid, outstanding — one surface, divided by hairlines. */
 export function FeesSummaryCard({ total, paid, due, nextDueDate }) {
+  const paidPercent = Math.round((paid / total) * 100);
+
   return (
-    <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
-      <div className="grid sm:grid-cols-3 gap-4 text-center">
-        <div>
-          <p className="text-indigo-100 text-sm">Total Fees</p>
-          <p className="text-2xl font-bold">{formatINR(total)}</p>
+    <div className="overflow-hidden rounded-xl border border-hairline bg-surface">
+      <div className="grid grid-cols-3 gap-px bg-hairline">
+        <div className="bg-surface p-5">
+          <p className="text-xs font-medium text-ink-muted">Billed</p>
+          <p className="mt-2 text-[22px] font-medium leading-7 tabular-nums text-ink">{formatINR(total)}</p>
+          <p className="mt-1 text-xs text-ink-secondary">Session 2026-27</p>
         </div>
-        <div>
-          <p className="text-indigo-100 text-sm">Paid</p>
-          <p className="text-2xl font-bold">{formatINR(paid)}</p>
+        <div className="bg-surface p-5">
+          <p className="text-xs font-medium text-ink-muted">Paid</p>
+          <p className="mt-2 text-[22px] font-medium leading-7 tabular-nums text-ink">{formatINR(paid)}</p>
+          <p className="mt-1 text-xs text-ink-secondary">{paidPercent}% of billed</p>
         </div>
-        <div className="bg-white/15 rounded-xl p-3">
-          <p className="text-indigo-100 text-sm">Due</p>
-          <p className="text-2xl font-bold">{formatINR(due)}</p>
-          <p className="text-xs text-indigo-100">Due {nextDueDate}</p>
+        <div className="bg-surface p-5">
+          <p className="text-xs font-medium text-ink-muted">Outstanding</p>
+          <p className="mt-2 text-[22px] font-medium leading-7 tabular-nums text-ink">{formatINR(due)}</p>
+          <p className="mt-1 text-xs text-ink-secondary">Due {nextDueDate}</p>
         </div>
+      </div>
+      <div className="h-1 w-full bg-surface-sunken">
+        <div className="h-full bg-accent" style={{ width: `${paidPercent}%` }} />
       </div>
     </div>
   );

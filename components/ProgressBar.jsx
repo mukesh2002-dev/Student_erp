@@ -1,8 +1,24 @@
-export default function ProgressBar({ value, color = "indigo" }) {
-  const colors = { indigo: "bg-indigo-600", emerald: "bg-emerald-500", blue: "bg-blue-500", orange: "bg-orange-500", rose: "bg-rose-500" };
+export default function ProgressBar({ value, color = "indigo", label }) {
+  const colors = {
+    indigo: "bg-accent",
+    emerald: "bg-positive",
+    blue: "bg-accent",
+    orange: "bg-warning",
+    rose: "bg-negative",
+  };
   return (
-    <div className="w-full h-2 bg-white dark:bg-[#111827] border border-slate-200 dark:border-[#334155] rounded-full overflow-hidden">
-      <div className={`h-full rounded-full transition-all duration-700 ${colors[color] || colors.indigo}`} style={{ width: `${Math.min(100, value)}%` }} />
+    <div
+      className="h-1.5 w-full overflow-hidden rounded-full bg-surface-sunken"
+      role="progressbar"
+      aria-valuenow={Math.min(100, Math.max(0, value))}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+    >
+      <div
+        className={`h-full rounded-full transition-[width] duration-500 ${colors[color] || colors.indigo}`}
+        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+      />
     </div>
   );
 }

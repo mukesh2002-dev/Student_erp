@@ -20,28 +20,39 @@ export function Table({ columns, rows = [], loading = false, emptyMessage = "No 
   }
   return (
     <div className={cn("overflow-x-auto", className)}>
-      <table className="w-full text-sm">
-        <thead className="bg-slate-50 dark:bg-[#172033]">
-          <tr>
-            {columns.map((c) => (
+      <table className="w-full text-[13px]">
+        <thead>
+          <tr className="border-b border-hairline bg-surface-raised">
+            {columns.map((column) => (
               <th
-                key={c.key}
-                className={cn("p-3 font-medium text-slate-600 dark:text-slate-300", c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left")}
+                key={column.key}
+                scope="col"
+                className={cn(
+                  "whitespace-nowrap px-5 py-2.5 font-medium text-ink-muted",
+                  column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"
+                )}
               >
-                {c.header}
+                {column.header}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
-            <tr key={row.id ?? i} className="border-t border-slate-100 dark:border-[#243044]">
-              {columns.map((c) => (
+          {rows.map((row, index) => (
+            <tr
+              key={row.id ?? index}
+              className="border-b border-hairline transition-colors last:border-b-0 hover:bg-surface-raised"
+            >
+              {columns.map((column) => (
                 <td
-                  key={c.key}
-                  className={cn("p-3", c.align === "right" && "text-right", c.align === "center" && "text-center")}
+                  key={column.key}
+                  className={cn(
+                    "px-5 py-3 text-ink-secondary",
+                    column.align === "right" && "text-right tabular-nums",
+                    column.align === "center" && "text-center"
+                  )}
                 >
-                  {c.render ? c.render(row) : row[c.key]}
+                  {column.render ? column.render(row) : row[column.key]}
                 </td>
               ))}
             </tr>

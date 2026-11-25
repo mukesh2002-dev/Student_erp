@@ -1,66 +1,140 @@
 "use client";
-import { latestResult, analytics } from "@/data/results";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, CartesianGrid } from "recharts";
-import Badge from "@/components/Badge";
-import { useTheme } from "@/components/ThemeProvider";
-import { getChartTheme } from "@/lib/chartTheme";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { latestResult, resultHistory, analytics } from "@/data/results";
+import { Badge, Card, CardBody, CardHeader, PageHeader, Table } from "@/components/ui";
+
+const gradeVariant = (grade) => (grade.startsWith("A") ? "success" : grade === "B+" ? "default" : "warning");
+
+const columns = [
+  { key: "name", header: "Subject", render: (row) => <span className="font-medium text-ink">{row.name}</span> },
+  {
+    key: "obtained",
+    header: "Marks",
+    align: "right",
+    render: (row) => (
+      <span className="tabular-nums">
+        <span className="text-ink">{row.obtained}</span>
+        <span className="text-ink-muted"> / {row.max}</span>
+      </span>
+    ),
+  },
+  { key: "percent", header: "Percent", align: "right", render: (row) => <span className="tabular-nums">{row.percent}%</span> },
+  {
+    key: "grade",
+    header: "Grade",
+    align: "center",
+    render: (row) => <Badge variant={gradeVariant(row.grade)}>{row.grade}</Badge>,
+  },
+];
+
+const chartData = latestResult.subjects.map((subject) => ({
+  subject: subject.name.split(" ")[0],
+  marks: subject.obtained,
+}));
 
 export default function ResultsPage() {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-  const chartTheme = getChartTheme(isDark);
-  const chartData = latestResult.subjects.map(s => ({ subject: s.name.slice(0, 7), marks: s.obtained }));
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div><h1 className="text-2xl font-bold">Results</h1><p className="text-sm text-slate-500">Latest result • {latestResult.exam} • {latestResult.date}</p></div>
+    <div className="enter mx-auto max-w-5xl space-y-6">
+      <PageHeader
+        title="Results"
+        description={`${latestResult.exam} · ${latestResult.date} · Session 2026-27`}
+        actions={<Badge variant="success">{latestResult.result}</Badge>}
+      />
 
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-indigo-100 text-sm">Overall Percentage</p>
-            <p className="text-4xl font-bold">{latestResult.percentage}%</p>
-            <p className="text-indigo-100 text-sm mt-1">Grade A • PASS • Position {latestResult.position}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 text-center">
-            <div className="bg-white/15 rounded-xl p-4"><p className="text-xl font-bold">{latestResult.totalObtained}/{latestResult.totalMax}</p><p className="text-xs text-indigo-100">Total</p></div>
-            <div className="bg-white/15 rounded-xl p-4"><p className="text-xl font-bold">{analytics.highest}</p><p className="text-xs text-indigo-100">Highest</p></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {latestResult.subjects.map(s => (
-          <div key={s.name} className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-slate-200 dark:border-[#243044]">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold">{s.name}</p>
-              <Badge variant={s.grade === "A+" ? "success" : s.grade === "A" ? "success" : "warning"}>{s.grade}</Badge>
-            </div>
-            <p className="text-2xl font-bold mt-2">{s.obtained}<span className="text-sm font-normal text-slate-500">/{s.max}</span></p>
-            <p className="text-xs text-slate-500">{s.percent}% • {s.grade}</p>
-            <div className="mt-3 h-2 bg-slate-100 dark:bg-[#1E293B] rounded-full overflow-hidden"><div className="h-full bg-indigo-600 rounded-full" style={{ width: `${s.percent}%` }} /></div>
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline sm:grid-cols-4">
+        {[
+          { label: "Overall", value: `${latestResult.percentage}%`, sub: `Class average ${latestResult.classAverage}%` },
+          { label: "Total marks", value: `${latestResult.totalObtained}`, sub: `out of ${latestResult.totalMax}` },
+          { label: "Grade", value: latestResult.grade, sub: "Session grade" },
+          { label: "Class position", value: latestResult.position, sub: "of 42 students" },
+        ].map((cell) => (
+          <div key={cell.label} className="bg-surface p-5">
+            <p className="text-xs font-medium text-ink-muted">{cell.label}</p>
+            <p className="mt-2 text-[28px] font-medium leading-8 tabular-nums text-ink">{cell.value}</p>
+            <p className="mt-1 text-xs text-ink-secondary">{cell.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
-          <h3 className="font-semibold mb-4">Subject Performance</h3>
-          <div className="h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} /><XAxis dataKey="subject" tick={{ fontSize: 11, fill: chartTheme.axis }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: chartTheme.axis, fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 100]} /><Tooltip contentStyle={{ background: chartTheme.tooltipBg, border: `1px solid ${chartTheme.tooltipBorder}`, color: chartTheme.tooltipText, borderRadius: "12px", fontSize: "12px" }} cursor={{ fill: isDark ? "#1E293B" : "#f1f5f9" }} /><Bar dataKey="marks" fill={chartTheme.bar} radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></div>
-        </div>
-        <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-200 dark:border-[#243044]">
-          <h3 className="font-semibold mb-4">Analytics</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 dark:bg-[#172033] rounded-xl p-4 text-center"><p className="text-xs text-slate-500">Highest Marks</p><p className="text-xl font-bold text-emerald-600">{analytics.highest}</p></div>
-            <div className="bg-slate-50 dark:bg-[#172033] rounded-xl p-4 text-center"><p className="text-xs text-slate-500">Lowest Marks</p><p className="text-xl font-bold text-red-500">{analytics.lowest}</p></div>
-            <div className="bg-slate-50 dark:bg-[#172033] rounded-xl p-4 text-center"><p className="text-xs text-slate-500">Overall Avg</p><p className="text-xl font-bold">{analytics.average}%</p></div>
-            <div className="bg-slate-50 dark:bg-[#172033] rounded-xl p-4 text-center"><p className="text-xs text-slate-500">Class Avg</p><p className="text-xl font-bold">{analytics.classAverage}%</p></div>
+      <Card>
+        <CardHeader className="flex items-baseline justify-between gap-4">
+          <h2 className="text-sm font-medium text-ink">Subject marks</h2>
+          <span className="record">{latestResult.subjects.length} subjects</span>
+        </CardHeader>
+        <Table columns={columns} rows={latestResult.subjects} emptyMessage="No marks published" />
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <h2 className="text-sm font-medium text-ink">Marks by subject</h2>
+            <p className="mt-0.5 text-xs text-ink-secondary">Out of 100 per subject</p>
+          </CardHeader>
+          <CardBody className="px-2 pb-4 pt-4">
+            <div className="h-[248px] w-full" role="img" aria-label="Marks by subject, out of 100">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 4, right: 12, bottom: 0, left: 0 }} barCategoryGap="34%">
+                  <CartesianGrid vertical={false} stroke="var(--hairline)" />
+                  <XAxis
+                    dataKey="subject"
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={8}
+                    tick={{ fontSize: 11, fill: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}
+                  />
+                  <YAxis
+                    width={28}
+                    domain={[0, 100]}
+                    ticks={[0, 25, 50, 75, 100]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "var(--surface-sunken)" }}
+                    contentStyle={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--hairline)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                      color: "var(--ink)",
+                      boxShadow: "none",
+                    }}
+                    labelStyle={{ color: "var(--ink-secondary)", fontSize: 11 }}
+                    formatter={(value) => [`${value} / 100`, "Marks"]}
+                  />
+                  <Bar dataKey="marks" fill="var(--accent)" radius={[2, 2, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-sm font-medium text-ink">Previous exams</h2>
+          </CardHeader>
+          <ul>
+            {resultHistory.map((item) => (
+              <li key={item.exam} className="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3 last:border-b-0">
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-medium text-ink">{item.exam}</p>
+                  <p className="record mt-0.5">{item.date}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2.5">
+                  <span className="text-[13px] tabular-nums text-ink">{item.percentage}%</span>
+                  <Badge variant={gradeVariant(item.grade)}>{item.grade}</Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-hairline px-5 py-3">
+            <p className="record">Highest {analytics.highest} · Lowest {analytics.lowest}</p>
           </div>
-          <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950 rounded-xl border border-amber-200 dark:border-amber-800">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Class Position: {analytics.position} (out of 42)</p>
-            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">Dummy data for prototype — ranks are illustrative only.</p>
-          </div>
-        </div>
+        </Card>
       </div>
+
+      <p className="record">Rankings are illustrative prototype data</p>
     </div>
   );
 }

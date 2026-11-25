@@ -25,7 +25,7 @@ export const dashboardStats = [
   { label: "Homework", value: "86%", sub: "15/18 submitted", icon: "homework", color: "emerald" },
   { label: "Syllabus", value: "72%", sub: "Overall progress", icon: "syllabus", color: "blue" },
   { label: "Average Marks", value: "82.4%", sub: "Across all subjects", icon: "marks", color: "violet" },
-  { label: "Pending Homework", value: "3", sub: "Due this week", icon: "pending", color: "amber" },
+  { label: "Pending Homework", value: "2", sub: "Due this week", icon: "pending", color: "amber" },
   { label: "Upcoming Exams", value: "2", sub: "In next 15 days", icon: "exam", color: "rose" },
   { label: "Assignments", value: "5", sub: "Active", icon: "assignment", color: "cyan" },
   { label: "Fees Due", value: "₹4,500", sub: "Due 30 Sep 2026", icon: "fees", color: "orange" },

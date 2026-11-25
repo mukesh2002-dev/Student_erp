@@ -9,27 +9,27 @@ export function Input({ label, error, helper, icon: Icon, className, inputClassN
   return (
     <div className={cn("space-y-1.5", className)}>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        <label htmlFor={inputId} className="block text-[13px] font-medium text-ink-secondary">
           {label}
         </label>
       )}
       <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />}
+        {Icon && <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" strokeWidth={1.5} />}
         <input
           id={inputId}
           className={cn(
-            "w-full rounded-xl border bg-white dark:bg-[#111827] px-4 py-2.5 text-sm outline-none transition text-slate-900 dark:text-slate-100 placeholder:text-slate-400",
-            Icon && "pl-10",
+            "h-10 w-full rounded-lg border bg-surface px-3.5 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-muted",
+            Icon && "pl-9",
             error
-              ? "border-red-400 focus:border-red-500"
-              : "border-slate-200 dark:border-[#334155] focus:border-indigo-500",
+              ? "border-negative/50 focus:border-negative"
+              : "border-hairline focus:border-hairline-strong",
             inputClassName
           )}
           {...rest}
         />
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
-      {helper && !error && <p className="text-xs text-slate-500">{helper}</p>}
+      {error && <p className="text-xs text-negative">{error}</p>}
+      {helper && !error && <p className="text-xs text-ink-muted">{helper}</p>}
     </div>
   );
 }
